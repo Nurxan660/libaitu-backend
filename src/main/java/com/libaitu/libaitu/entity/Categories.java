@@ -6,10 +6,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "categories")
 @Getter
 @Setter
 @NoArgsConstructor
-public class BooksCategories {
+public class Categories {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -1,7 +1,12 @@
 package com.libaitu.libaitu.repository;
 
-import com.libaitu.libaitu.entity.BooksCategories;
-import org.springframework.data.repository.CrudRepository;
+import com.libaitu.libaitu.entity.BookCategory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface BookCategoryRepository extends CrudRepository<BooksCategories, Integer> {
+import java.util.List;
+
+public interface BookCategoryRepository extends JpaRepository<BookCategory, Integer> {
+    Page<BookCategory> findAllByCategoriesBookCategoryNameIn(List<String> bookCategoryNames, Pageable pageable);
 }

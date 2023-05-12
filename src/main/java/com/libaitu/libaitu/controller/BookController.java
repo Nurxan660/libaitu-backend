@@ -1,14 +1,12 @@
 package com.libaitu.libaitu.controller;
 
-import com.libaitu.libaitu.dto.DoBookingRequest;
+import com.libaitu.libaitu.dto.BookInfoRes;
 import com.libaitu.libaitu.dto.GetBooksPaginationRes;
-import com.libaitu.libaitu.entity.BooksCategories;
+import com.libaitu.libaitu.entity.Categories;
 import com.libaitu.libaitu.exception.NotFoundException;
 import com.libaitu.libaitu.service.BookService;
-import com.libaitu.libaitu.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,7 +39,23 @@ public class BookController {
     @GetMapping("/getCategories")
     public ResponseEntity getBooksCategories() {
 
-        List<BooksCategories> res = bookService.getBookCategories();
+        List<Categories> res = bookService.getBookCategories();
+        return ResponseEntity.ok(res);
+
+    }
+
+    @GetMapping("/getByCategories")
+    public ResponseEntity getBooksByCategories(@RequestParam List<String> categories, @RequestParam int page, @RequestParam int size) {
+
+        GetBooksPaginationRes res = bookService.getBooksByCategories(page, size, categories);
+        return ResponseEntity.ok(res);
+
+    }
+
+    @GetMapping("/getInfo")
+    public ResponseEntity getBookInfo(@RequestParam Integer bookId) throws NotFoundException {
+
+        BookInfoRes res = bookService.getBookInfo(bookId);
         return ResponseEntity.ok(res);
 
     }

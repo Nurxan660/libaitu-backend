@@ -1,38 +1,22 @@
-package com.libaitu.libaitu.entity;
+package com.libaitu.libaitu.dto;
 
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name="books")
 @Getter
 @Setter
+@AllArgsConstructor
 @NoArgsConstructor
-public class Books {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer bookId;
+public class BookInfoRes {
+
     private String bookName;
-    @Column(columnDefinition = "text")
     private String bookDescription;
     private String bookImageUrl;
     private String bookAuthor;
     private String yearOfPublishing;
     private Integer amountOfBooks;
-    private Integer rating;
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
