@@ -15,7 +15,9 @@ public class Books {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer bookId;
     private String bookName;
+    @Column(columnDefinition = "text")
     private String bookDescription;
+    private String bookImageUrl;
     private String bookAuthor;
     private String yearOfPublishing;
     @ManyToOne
