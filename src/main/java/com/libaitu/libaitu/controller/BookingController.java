@@ -3,6 +3,8 @@ package com.libaitu.libaitu.controller;
 import com.libaitu.libaitu.dto.DoBookingRequest;
 import com.libaitu.libaitu.dto.RegResponse;
 import com.libaitu.libaitu.dto.RegistrationReq;
+import com.libaitu.libaitu.exception.BookAlreadyBookedException;
+import com.libaitu.libaitu.exception.BookOutOfStockException;
 import com.libaitu.libaitu.exception.NotFoundException;
 import com.libaitu.libaitu.service.BookingService;
 import org.springframework.security.core.Authentication;
@@ -21,7 +23,7 @@ public class BookingController {
 
 
     @PostMapping("/do")
-    public ResponseEntity doBooking(@RequestBody DoBookingRequest req, Authentication authentication) throws NotFoundException {
+    public ResponseEntity doBooking(@RequestBody DoBookingRequest req, Authentication authentication) throws NotFoundException, BookOutOfStockException, BookAlreadyBookedException {
 
         bookingService.doBooking(req, authentication);
         return ResponseEntity.ok("You have successfully made a booking");

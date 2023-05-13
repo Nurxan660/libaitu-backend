@@ -2,9 +2,7 @@ package com.libaitu.libaitu.exception.handler;
 
 
 import com.libaitu.libaitu.dto.ResponseMessage;
-import com.libaitu.libaitu.exception.NotFoundException;
-import com.libaitu.libaitu.exception.TokenExpiredException;
-import com.libaitu.libaitu.exception.TokenNotFoundException;
+import com.libaitu.libaitu.exception.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -31,4 +29,12 @@ public class CustomAdvice {
         ResponseMessage exception=new ResponseMessage(e.getMessage());
         return ResponseEntity.status(404).body(exception);
     }
+
+    @ExceptionHandler({BookOutOfStockException.class, BookAlreadyBookedException.class})
+    public ResponseEntity<ResponseMessage> bookOutOfStockException(Exception e){
+        ResponseMessage exception=new ResponseMessage(e.getMessage());
+        return ResponseEntity.status(409).body(exception);
+    }
+
+
 }

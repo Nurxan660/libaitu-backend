@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="bookings")
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"book_id", "user_id"})})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,7 +22,7 @@ public class Bookings {
     @JoinColumn(name="user_id")
     private User user;
     private Integer amountOfDay;
-
+    private String phoneNumber;
     @Enumerated(EnumType.STRING)
     private EBookingStatuses bookingStatus;
 

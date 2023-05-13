@@ -14,4 +14,5 @@ public class DoBookingRequest {
 
     private Integer amountOfDay;
     private Integer bookId;
+    private String phoneNumber;
 }
