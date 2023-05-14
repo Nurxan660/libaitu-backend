@@ -1,9 +1,12 @@
 package com.libaitu.libaitu.entity;
 
 import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"book_id", "user_id"})})
@@ -23,6 +26,7 @@ public class Bookings {
     private User user;
     private Integer amountOfDay;
     private String phoneNumber;
+    private LocalDateTime bookingTime;
     @Enumerated(EnumType.STRING)
     private EBookingStatuses bookingStatus;
 

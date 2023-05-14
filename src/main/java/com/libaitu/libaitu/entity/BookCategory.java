@@ -1,10 +1,11 @@
 package com.libaitu.libaitu.entity;
 
 import com.libaitu.libaitu.compositeKey.BookCategoryKey;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import jakarta.persistence.*;
 
 @Entity
 @Getter

@@ -1,5 +1,5 @@
 package com.libaitu.libaitu.entity;
 
 public enum EBookingStatuses {
-    PENDING, CANCELED, IN_USE, PASSED, APPROVED
+     CANCELED, IN_USE, COMPLETED, ALLEGED_TAKING
 }

@@ -2,11 +2,13 @@ package com.libaitu.libaitu.controller;
 
 import com.libaitu.libaitu.dto.BookInfoRes;
 import com.libaitu.libaitu.dto.GetBooksPaginationRes;
+import com.libaitu.libaitu.dto.RequestedBooksRes;
 import com.libaitu.libaitu.entity.Categories;
 import com.libaitu.libaitu.exception.NotFoundException;
 import com.libaitu.libaitu.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,6 +58,14 @@ public class BookController {
     public ResponseEntity getBookInfo(@RequestParam Integer bookId) throws NotFoundException {
 
         BookInfoRes res = bookService.getBookInfo(bookId);
+        return ResponseEntity.ok(res);
+
+    }
+
+    @GetMapping("/get/requested")
+    public ResponseEntity getRequestedBooks(Authentication authentication) throws NotFoundException {
+
+        List<RequestedBooksRes> res= bookService.getRequestedBooks(authentication);
         return ResponseEntity.ok(res);
 
     }

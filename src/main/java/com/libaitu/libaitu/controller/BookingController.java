@@ -29,4 +29,12 @@ public class BookingController {
         return ResponseEntity.ok("You have successfully made a booking");
 
     }
+
+    @DeleteMapping ("/cancel")
+    public ResponseEntity cancelBooking(@RequestParam Integer bookingId) throws NotFoundException, BookOutOfStockException, BookAlreadyBookedException {
+
+        bookingService.cancelBooking(bookingId);
+        return ResponseEntity.ok("You canceled booking");
+
+    }
 }
