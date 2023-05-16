@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface BookRepository extends JpaRepository<Books, Integer> {
     Page<Books> findAll(Pageable pageable);
+    Page<Books> findAllByIsRecommended(boolean isRecommended, Pageable pageable);
     @Query(value="select * from books where book_author||' '||book_name ilike %:pattern%",nativeQuery = true)
     Page<Books> findByPattern(@Param("pattern") String pattern, Pageable pageable);
 }

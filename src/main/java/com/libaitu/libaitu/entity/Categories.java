@@ -16,6 +16,7 @@ public class Categories {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer bookCategoryId;
+    @Column(unique = true)
     private String bookCategoryName;
 
 

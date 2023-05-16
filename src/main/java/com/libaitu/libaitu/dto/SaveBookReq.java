@@ -1,9 +1,6 @@
 package com.libaitu.libaitu.dto;
 
-
-import com.libaitu.libaitu.entity.BookCategory;
-import com.libaitu.libaitu.entity.Categories;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +12,8 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookInfoRes {
+public class SaveBookReq {
+
 
     private String bookName;
     private String bookDescription;
@@ -24,8 +22,6 @@ public class BookInfoRes {
     private String yearOfPublishing;
     private Integer amountOfBooks;
     private Integer rating;
-    private List<String> category;
-    private boolean isRecommended;
-
-
+    private boolean recommended;
+    private List<String> categories;
 }

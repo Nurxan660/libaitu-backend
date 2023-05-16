@@ -20,10 +20,12 @@ public class BookCategory {
     @MapsId("bookId")
     private Books books;
 
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name="category_id")
     @MapsId("categoryId")
     private Categories categories;
+
+
 
 
 

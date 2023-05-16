@@ -1,7 +1,10 @@
 package com.libaitu.libaitu.service;
 
 
+import com.libaitu.libaitu.dto.ChangeBookingStatusReq;
 import com.libaitu.libaitu.dto.DoBookingRequest;
+import com.libaitu.libaitu.dto.GetBookingsByStatusAndEmailRes;
+import com.libaitu.libaitu.dto.pojo.BookingByStatusAndEmail;
 import com.libaitu.libaitu.entity.*;
 import com.libaitu.libaitu.exception.BookAlreadyBookedException;
 import com.libaitu.libaitu.exception.BookOutOfStockException;
@@ -13,17 +16,26 @@ import com.libaitu.libaitu.security.UserDetailsImpl;
 import jakarta.persistence.*;
 
 import org.hibernate.exception.ConstraintViolationException;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Book;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @EnableScheduling
@@ -35,6 +47,8 @@ public class BookingService {
     private BookRepository bookRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ModelMapper modelMapper;
     private static final Logger log= LoggerFactory.getLogger(BookingService.class);
 
 
@@ -84,10 +98,70 @@ public class BookingService {
 
     public void cancelBooking(Integer bookingId) throws NotFoundException {
         Bookings booking = bookingRepository.findById(bookingId).orElseThrow(()->new NotFoundException("booking not found"));
+        Books book = booking.getBooks();
+        book.setAmountOfBooks(book.getAmountOfBooks()+1);
         booking.setBookingStatus(EBookingStatuses.CANCELED);
             bookingRepository.delete(booking);
+            bookRepository.save(book);
 
     }
+
+    public GetBookingsByStatusAndEmailRes findStudentsBookingByEmailAndStatus(String email, List<String> status, int page , int size) {
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
+        List<EBookingStatuses> statuses = new ArrayList<>();
+        status.forEach((d)->{
+            if(d.equals("In use")) {
+                statuses.add(EBookingStatuses.IN_USE);
+            }
+            if(d.equals("Alleged taking")){
+                statuses.add(EBookingStatuses.ALLEGED_TAKING);
+            }
+            if(d.equals("Completed")){
+                statuses.add(EBookingStatuses.COMPLETED);
+            }
+        });
+
+        Pageable pageable = PageRequest.of(page, size);
+        GetBookingsByStatusAndEmailRes res = new GetBookingsByStatusAndEmailRes();
+        Page<Bookings> bookingsList = bookingRepository.findAllByUserEmailAndBookingStatusIn(email,statuses, pageable);
+        List<BookingByStatusAndEmail> bookingByStatusAndEmails = bookingsList.stream().map((d)->{
+            BookingByStatusAndEmail booking = new BookingByStatusAndEmail();
+            booking.setBookingId(d.getBookingId());
+            booking.setBookName(d.getBooks().getBookName());
+            booking.setEmail(d.getUser().getEmail());
+            booking.setBookingStatus(d.getBookingStatus());
+            booking.setPhoneNumber(d.getPhoneNumber());
+            booking.setFullName(d.getUser().getFullName());
+            booking.setRemainTime(Duration.between(LocalDateTime.now(), d.getBookingTime().plusDays(d.getAmountOfDay())).getSeconds());
+            return booking;
+        }).collect(Collectors.toList());
+
+        res.setContent(bookingByStatusAndEmails);
+        res.setTotalPages(bookingsList.getTotalPages());
+        return res;
+    }
+
+    public void changeBookingStatus(ChangeBookingStatusReq req) throws NotFoundException {
+        Bookings bookings = bookingRepository.findById(req.getBookingId()).orElseThrow(()->new NotFoundException("Booking not found"));
+        switch (req.getStatus()) {
+            case "Canceled":
+                bookings.setBookingStatus(EBookingStatuses.CANCELED);
+                break;
+            case "In use":
+                bookings.setBookingStatus(EBookingStatuses.IN_USE);
+                break;
+            case "Completed":
+                bookings.setBookingStatus(EBookingStatuses.COMPLETED);
+                break;
+            case "Alleged taking":
+                bookings.setBookingStatus(EBookingStatuses.ALLEGED_TAKING);
+                break;
+        }
+        bookingRepository.save(bookings);
+    }
+
+
+
 
 
 

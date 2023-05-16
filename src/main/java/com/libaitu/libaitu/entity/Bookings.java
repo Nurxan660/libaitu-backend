@@ -18,7 +18,7 @@ public class Bookings {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer bookingId;
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name="book_id")
     private Books books;
     @ManyToOne

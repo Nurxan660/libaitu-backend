@@ -80,7 +80,7 @@ public class AuthService {
         User user = new User();
         user.setUsername(req.getUsername());
         user.setPassword(encoder.encode(req.getPassword()));
-        Set<String> strRoles = new HashSet<>();
+        List<String> strRoles = new ArrayList<>();
         if(req.getRole()!=null){
             strRoles.add(req.getRole());
         }
@@ -90,12 +90,12 @@ public class AuthService {
             Roles userRole = roleRepository.findByRole(ERole.ROLE_USER).orElseThrow(() -> new RuntimeException("Role not found"));
             roles.add(userRole);
         } else {
-            strRoles.forEach(role -> {
-                if (role == "admin") {
+
+                if (strRoles.get(0).equals("admin")) {
                     Roles adminRole = roleRepository.findByRole(ERole.ROLE_ADMIN).orElseThrow(() -> new RuntimeException("Role not found"));
                     roles.add(adminRole);
                 }
-            });
+
         }
         user.setRole(roles.get(0));
         user.setFullName(req.getFullName());
