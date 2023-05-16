@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"book_id", "user_id"})})
+@Table()
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,6 +29,8 @@ public class Bookings {
     private LocalDateTime bookingTime;
     @Enumerated(EnumType.STRING)
     private EBookingStatuses bookingStatus;
+    private boolean showInHistory;
+    private LocalDateTime bookingCompletedTime;
 
 
 

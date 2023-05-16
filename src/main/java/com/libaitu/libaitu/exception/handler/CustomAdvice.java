@@ -30,7 +30,7 @@ public class CustomAdvice {
         return ResponseEntity.status(404).body(exception);
     }
 
-    @ExceptionHandler({BookOutOfStockException.class, BookAlreadyBookedException.class, BooksEqualException.class})
+    @ExceptionHandler({BookOutOfStockException.class, BookAlreadyBookedException.class, BooksEqualException.class, StatusChangeException.class})
     public ResponseEntity<ResponseMessage> bookOutOfStockException(Exception e){
         ResponseMessage exception=new ResponseMessage(e.getMessage());
         return ResponseEntity.status(409).body(exception);

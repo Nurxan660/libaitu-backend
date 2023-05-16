@@ -139,6 +139,14 @@ public class BookController {
         return ResponseEntity.ok(res);
 
     }
+    @GetMapping("/get/completed")
+    public ResponseEntity getCompletedBooks(@RequestParam  int page, @RequestParam  int size, Authentication authentication) {
+
+        CompletedBooksPaginationRes res= bookService.getCompletedBooksOfUser(authentication, page, size);
+        return ResponseEntity.ok(res);
+
+    }
+
 
 
 

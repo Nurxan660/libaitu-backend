@@ -2,13 +2,16 @@ package com.libaitu.libaitu.service;
 
 
 import com.libaitu.libaitu.dto.ChangeBookingStatusReq;
+import com.libaitu.libaitu.dto.CompletedBooksPaginationRes;
 import com.libaitu.libaitu.dto.DoBookingRequest;
 import com.libaitu.libaitu.dto.GetBookingsByStatusAndEmailRes;
 import com.libaitu.libaitu.dto.pojo.BookingByStatusAndEmail;
+import com.libaitu.libaitu.dto.pojo.CompletedUserBooks;
 import com.libaitu.libaitu.entity.*;
 import com.libaitu.libaitu.exception.BookAlreadyBookedException;
 import com.libaitu.libaitu.exception.BookOutOfStockException;
 import com.libaitu.libaitu.exception.NotFoundException;
+import com.libaitu.libaitu.exception.StatusChangeException;
 import com.libaitu.libaitu.repository.BookRepository;
 import com.libaitu.libaitu.repository.BookingRepository;
 import com.libaitu.libaitu.repository.UserRepository;
@@ -56,27 +59,26 @@ public class BookingService {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User user = userRepository.findById(userDetails.getUserId()).orElseThrow(()->new NotFoundException("user not found"));
         Books books = bookRepository.findById(doBookingRequest.getBookId()).orElseThrow(()->new NotFoundException("book not found"));
-        try {
+        List<EBookingStatuses> statuses = List.of(EBookingStatuses.IN_USE, EBookingStatuses.ALLEGED_TAKING);
             if (books.getAmountOfBooks() != 0) {
-
-                Bookings bookings = new Bookings();
-                bookings.setBooks(books);
-                bookings.setUser(user);
-                bookings.setPhoneNumber(doBookingRequest.getPhoneNumber());
-                bookings.setAmountOfDay(doBookingRequest.getAmountOfDay());
-                bookings.setBookingStatus(EBookingStatuses.ALLEGED_TAKING);
-                bookings.setBookingTime(LocalDateTime.now());
-                bookingRepository.save(bookings);
-                books.setAmountOfBooks(books.getAmountOfBooks() - 1);
-                bookRepository.save(books);
+                if(!bookingRepository.existsByBooksBookIdAndUserUserIdAndBookingStatusIn(books.getBookId(), userDetails.getUserId(), statuses )) {
+                    Bookings bookings = new Bookings();
+                    bookings.setBooks(books);
+                    bookings.setUser(user);
+                    bookings.setPhoneNumber(doBookingRequest.getPhoneNumber());
+                    bookings.setAmountOfDay(doBookingRequest.getAmountOfDay());
+                    bookings.setBookingStatus(EBookingStatuses.ALLEGED_TAKING);
+                    bookings.setBookingTime(LocalDateTime.now());
+                    bookingRepository.save(bookings);
+                    books.setAmountOfBooks(books.getAmountOfBooks() - 1);
+                    bookRepository.save(books);
+                } else {
+                    throw new BookAlreadyBookedException("You have already booked the book");
+                }
             } else {
                 throw new BookOutOfStockException("Books are out of stock!");
             }
-        } catch (DataIntegrityViolationException e) {
-                String message = "You have already booked this book!";
-                throw new BookAlreadyBookedException(message);
 
-        }
 
     }
 
@@ -141,17 +143,26 @@ public class BookingService {
         return res;
     }
 
-    public void changeBookingStatus(ChangeBookingStatusReq req) throws NotFoundException {
+    public void changeBookingStatus(ChangeBookingStatusReq req) throws NotFoundException, StatusChangeException {
         Bookings bookings = bookingRepository.findById(req.getBookingId()).orElseThrow(()->new NotFoundException("Booking not found"));
         switch (req.getStatus()) {
             case "Canceled":
-                bookings.setBookingStatus(EBookingStatuses.CANCELED);
+
+                bookingRepository.deleteInBatch(List.of(bookings));
                 break;
             case "In use":
                 bookings.setBookingStatus(EBookingStatuses.IN_USE);
+                bookings.setBookingTime(LocalDateTime.now());
                 break;
             case "Completed":
-                bookings.setBookingStatus(EBookingStatuses.COMPLETED);
+                if(bookings.getBookingStatus().equals(EBookingStatuses.ALLEGED_TAKING)) {
+                    throw new StatusChangeException("You cannot change status from alleged taking to completed");
+                } else {
+                    bookings.setBookingStatus(EBookingStatuses.COMPLETED);
+                    bookings.setBookingCompletedTime(LocalDateTime.now());
+                    bookings.setShowInHistory(true);
+                }
+
                 break;
             case "Alleged taking":
                 bookings.setBookingStatus(EBookingStatuses.ALLEGED_TAKING);
@@ -159,6 +170,8 @@ public class BookingService {
         }
         bookingRepository.save(bookings);
     }
+
+
 
 
 

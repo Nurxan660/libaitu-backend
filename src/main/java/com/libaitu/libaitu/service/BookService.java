@@ -2,6 +2,7 @@ package com.libaitu.libaitu.service;
 
 import com.libaitu.libaitu.compositeKey.BookCategoryKey;
 import com.libaitu.libaitu.dto.*;
+import com.libaitu.libaitu.dto.pojo.CompletedUserBooks;
 import com.libaitu.libaitu.entity.*;
 import com.libaitu.libaitu.exception.BooksEqualException;
 import com.libaitu.libaitu.exception.NotFoundException;
@@ -202,6 +203,17 @@ public class BookService {
         List<UsedBookRes> res = bookings.stream().map((d)->{
             return new UsedBookRes(d.getBookingId(),d.getBooks().getBookName(),d.getBooks().getBookImageUrl(),d.getBookingStatus(), Duration.between(LocalDateTime.now(), d.getBookingTime().plusDays(d.getAmountOfDay())).getSeconds());
         }).collect(Collectors.toList());
+        return res;
+    }
+
+    public CompletedBooksPaginationRes getCompletedBooksOfUser(Authentication authentication, int page, int size) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Bookings> bookings = bookingRepository.findAllByUserUserIdAndBookingStatusAndShowInHistory(userDetails.getUserId(),EBookingStatuses.COMPLETED, true, pageable);
+        List<CompletedUserBooks> completedUserBooks = bookings.stream().map((d)->{
+            return new CompletedUserBooks(d.getBookingId(), d.getBooks().getBookImageUrl(), d.getBookingStatus(),d.getBooks().getBookName(),Duration.between(d.getBookingCompletedTime(), d.getBookingTime().plusDays(d.getAmountOfDay())).getSeconds());
+        }).collect(Collectors.toList());
+        CompletedBooksPaginationRes res = new CompletedBooksPaginationRes(completedUserBooks, bookings.getTotalPages());
         return res;
     }
 

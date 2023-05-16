@@ -4,6 +4,7 @@ import com.libaitu.libaitu.dto.*;
 import com.libaitu.libaitu.exception.BookAlreadyBookedException;
 import com.libaitu.libaitu.exception.BookOutOfStockException;
 import com.libaitu.libaitu.exception.NotFoundException;
+import com.libaitu.libaitu.exception.StatusChangeException;
 import com.libaitu.libaitu.service.BookingService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -50,7 +51,7 @@ public class BookingController {
 
     @PutMapping ("/changeStatus")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity changeBookingStatus(@RequestBody ChangeBookingStatusReq req) throws NotFoundException {
+    public ResponseEntity changeBookingStatus(@RequestBody ChangeBookingStatusReq req) throws NotFoundException, StatusChangeException {
 
         bookingService.changeBookingStatus(req);
         return ResponseEntity.ok("You have successfully changed the status!");
