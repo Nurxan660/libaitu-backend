@@ -13,6 +13,9 @@ public interface BookingRepository extends JpaRepository<Bookings, Integer> {
     Page<Bookings> findAllByUserUserIdAndBookingStatusAndShowInHistory(Integer userId, EBookingStatuses bookingStatus, boolean showInHistory, Pageable pageable);
 
     List<Bookings> findAllByBookingStatus(EBookingStatuses bookingStatus);
+
+    Page<Bookings> findAllByBookingStatus(EBookingStatuses bookingStatus, Pageable pageable);
+
     Page<Bookings> findAllByUserEmailAndBookingStatusIn(String email, List<EBookingStatuses> bookingStatus, Pageable pageable);
 
 

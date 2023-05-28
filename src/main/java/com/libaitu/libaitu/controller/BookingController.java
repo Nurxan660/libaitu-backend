@@ -1,10 +1,7 @@
 package com.libaitu.libaitu.controller;
 
 import com.libaitu.libaitu.dto.*;
-import com.libaitu.libaitu.exception.BookAlreadyBookedException;
-import com.libaitu.libaitu.exception.BookOutOfStockException;
-import com.libaitu.libaitu.exception.NotFoundException;
-import com.libaitu.libaitu.exception.StatusChangeException;
+import com.libaitu.libaitu.exception.*;
 import com.libaitu.libaitu.service.BookingService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -25,7 +22,7 @@ public class BookingController {
 
 
     @PostMapping("/do")
-    public ResponseEntity doBooking(@RequestBody DoBookingRequest req, Authentication authentication) throws NotFoundException, BookOutOfStockException, BookAlreadyBookedException {
+    public ResponseEntity doBooking(@RequestBody DoBookingRequest req, Authentication authentication) throws NotFoundException, BookOutOfStockException, BookAlreadyBookedException, BookBookingNoAccess {
 
         bookingService.doBooking(req, authentication);
         return ResponseEntity.ok("You have successfully made a booking");
@@ -45,6 +42,15 @@ public class BookingController {
     public ResponseEntity getBookingByStatusAndEmail(@RequestParam String email , @RequestParam List<String> statuses, int page, int size) {
 
         GetBookingsByStatusAndEmailRes res = bookingService.findStudentsBookingByEmailAndStatus(email, statuses, page, size);
+        return ResponseEntity.ok(res);
+
+    }
+
+    @GetMapping ("/getByStatus")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity getBookingByStatus( int page, int size) {
+
+        GetBookingsByStatusAndEmailRes res = bookingService.findStudentsBookingByStatus( page, size);
         return ResponseEntity.ok(res);
 
     }

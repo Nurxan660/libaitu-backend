@@ -26,6 +26,7 @@ public class BookInfoRes {
     private Integer rating;
     private List<String> category;
     private boolean isRecommended;
+    private boolean isNew;
 
 
 }

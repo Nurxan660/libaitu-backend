@@ -8,10 +8,7 @@ import com.libaitu.libaitu.dto.GetBookingsByStatusAndEmailRes;
 import com.libaitu.libaitu.dto.pojo.BookingByStatusAndEmail;
 import com.libaitu.libaitu.dto.pojo.CompletedUserBooks;
 import com.libaitu.libaitu.entity.*;
-import com.libaitu.libaitu.exception.BookAlreadyBookedException;
-import com.libaitu.libaitu.exception.BookOutOfStockException;
-import com.libaitu.libaitu.exception.NotFoundException;
-import com.libaitu.libaitu.exception.StatusChangeException;
+import com.libaitu.libaitu.exception.*;
 import com.libaitu.libaitu.repository.BookRepository;
 import com.libaitu.libaitu.repository.BookingRepository;
 import com.libaitu.libaitu.repository.UserRepository;
@@ -55,13 +52,25 @@ public class BookingService {
     private static final Logger log= LoggerFactory.getLogger(BookingService.class);
 
 
-    public void doBooking(DoBookingRequest doBookingRequest, Authentication authentication) throws NotFoundException, BookOutOfStockException, BookAlreadyBookedException {
+    public void doBooking(DoBookingRequest doBookingRequest, Authentication authentication) throws NotFoundException, BookOutOfStockException, BookAlreadyBookedException, BookBookingNoAccess {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User user = userRepository.findById(userDetails.getUserId()).orElseThrow(()->new NotFoundException("user not found"));
         Books books = bookRepository.findById(doBookingRequest.getBookId()).orElseThrow(()->new NotFoundException("book not found"));
+
+        List<Bookings> bookingsList = bookingRepository.findAllByUserUserIdAndBookingStatus(userDetails.getUserId(), EBookingStatuses.COMPLETED);
+        long total = bookingsList.stream().mapToLong((d)-> Duration.between(d.getBookingCompletedTime(),d.getBookingTime().plusDays(d.getAmountOfDay())).toDays()).sum();
+
         List<EBookingStatuses> statuses = List.of(EBookingStatuses.IN_USE, EBookingStatuses.ALLEGED_TAKING);
-            if (books.getAmountOfBooks() != 0) {
-                if(!bookingRepository.existsByBooksBookIdAndUserUserIdAndBookingStatusIn(books.getBookId(), userDetails.getUserId(), statuses )) {
+            if (books.getAmountOfBooks() == 0) {
+                throw new BookOutOfStockException("Books are out of stock!");
+            }
+            else if(Math.abs(total)>30) {
+                throw new BookBookingNoAccess("You can't booking the book because you're over 30 late!");
+
+            }
+            else if(bookingRepository.existsByBooksBookIdAndUserUserIdAndBookingStatusIn(books.getBookId(), userDetails.getUserId(), statuses )) {
+                throw new BookAlreadyBookedException("You have already booked the book");
+            }
                     Bookings bookings = new Bookings();
                     bookings.setBooks(books);
                     bookings.setUser(user);
@@ -72,14 +81,6 @@ public class BookingService {
                     bookingRepository.save(bookings);
                     books.setAmountOfBooks(books.getAmountOfBooks() - 1);
                     bookRepository.save(books);
-                } else {
-                    throw new BookAlreadyBookedException("You have already booked the book");
-                }
-            } else {
-                throw new BookOutOfStockException("Books are out of stock!");
-            }
-
-
     }
 
     @Scheduled(fixedDelay = 60000)
@@ -140,6 +141,35 @@ public class BookingService {
 
         res.setContent(bookingByStatusAndEmails);
         res.setTotalPages(bookingsList.getTotalPages());
+        res.setTotalElements((int) bookingsList.getTotalElements());
+        return res;
+    }
+
+
+    public GetBookingsByStatusAndEmailRes findStudentsBookingByStatus( int page , int size) {
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
+
+
+        Pageable pageable = PageRequest.of(page, size);
+        GetBookingsByStatusAndEmailRes res = new GetBookingsByStatusAndEmailRes();
+        Page<Bookings> bookingsList = bookingRepository.findAllByBookingStatus(EBookingStatuses.ALLEGED_TAKING, pageable);
+        List<BookingByStatusAndEmail> bookingByStatusAndEmails = bookingsList.stream().map((d)->{
+            BookingByStatusAndEmail booking = new BookingByStatusAndEmail();
+            booking.setBookingId(d.getBookingId());
+            booking.setBookName(d.getBooks().getBookName());
+            booking.setEmail(d.getUser().getEmail());
+            booking.setBookingStatus(d.getBookingStatus());
+            booking.setPhoneNumber(d.getPhoneNumber());
+            booking.setFullName(d.getUser().getFullName());
+            booking.setRemainTime(Duration.between(LocalDateTime.now(), d.getBookingTime().plusDays(d.getAmountOfDay())).getSeconds());
+            return booking;
+        }).collect(Collectors.toList());
+
+        res.setContent(bookingByStatusAndEmails);
+
+        res.setTotalPages(bookingsList.getTotalPages());
+        res.setTotalElements((int) bookingsList.getTotalElements());
+
         return res;
     }
 
@@ -158,6 +188,7 @@ public class BookingService {
                 if(bookings.getBookingStatus().equals(EBookingStatuses.ALLEGED_TAKING)) {
                     throw new StatusChangeException("You cannot change status from alleged taking to completed");
                 } else {
+
                     bookings.setBookingStatus(EBookingStatuses.COMPLETED);
                     bookings.setBookingCompletedTime(LocalDateTime.now());
                     bookings.setShowInHistory(true);
@@ -170,6 +201,11 @@ public class BookingService {
         }
         bookingRepository.save(bookings);
     }
+
+
+
+
+
 
 
 

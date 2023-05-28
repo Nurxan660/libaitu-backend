@@ -2,9 +2,9 @@ package com.libaitu.libaitu.controller;
 
 
 import com.libaitu.libaitu.dto.*;
+import com.libaitu.libaitu.entity.EmailRegistrationConfirmToken;
 import com.libaitu.libaitu.entity.User;
-import com.libaitu.libaitu.exception.TokenExpiredException;
-import com.libaitu.libaitu.exception.TokenNotFoundException;
+import com.libaitu.libaitu.exception.*;
 import com.libaitu.libaitu.service.AuthService;
 import com.libaitu.libaitu.service.EmailVerificationTokenService;
 import com.libaitu.libaitu.service.RefreshTokenService;
@@ -37,9 +37,9 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity signUp(@RequestBody RegistrationReq req){
+    public ResponseEntity signUp(@RequestBody RegistrationReq req, @RequestParam String code) throws EmailAlreadyExistException, UsernameAlreadyExistException, InvalidEmailCodeException, TokenExpiredException, NotFoundException {
 
-        RegResponse regResponse=authService.registration(req);
+        RegResponse regResponse=authService.registration(req,code);
         return ResponseEntity.ok(regResponse);
 
     }
@@ -66,9 +66,18 @@ public class AuthController {
 
     }
 
+    @PostMapping("/confirmEmailForRegistration")
+    public ResponseEntity getEmailConfirmationCodeForRegistration(@RequestBody RegistrationReq req) throws EmailAlreadyExistException, UsernameAlreadyExistException {
+
+        long res = authService.getEmailConfirmationCodeForRegistration(req);
+        return ResponseEntity.ok(res);
+
+
+    }
+
     @GetMapping("/confirmToken")
     public ResponseEntity confirmToken(@RequestParam String token) throws TokenExpiredException {
-        emailVerificationTokenService.confirmTokenAndChangePassword(token);
+          emailVerificationTokenService.confirmTokenAndChangePassword(token);
         return ResponseEntity.ok("New password sended to your email");
     }
 }

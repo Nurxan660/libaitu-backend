@@ -48,6 +48,7 @@ public class BookService {
 
         Books book= modelMapper.map(req, Books.class);
         book.setRecommended(req.isRecommended());
+        book.setNew(req.isNews());
         bookRepository.save(book);
         List<BookCategory> bookCategoryList=new ArrayList<>();
         req.getCategories().forEach((d)->{
@@ -82,14 +83,14 @@ public class BookService {
         if(book.getBookName().equals(req.getBookName())&&book.getBookAuthor().equals(req.getBookAuthor())
         &&book.getYearOfPublishing().equals(req.getYearOfPublishing())&&book.getRating().equals(req.getRating())
         &&book.getAmountOfBooks().equals(req.getAmountOfBooks())&&book.getBookDescription().equals(req.getBookDescription())
-        &&book.getBookImageUrl().equals(req.getBookImageUrl())&&isCategoriesEquals&&book.isRecommended()==req.isRecommended()) {
+        &&book.getBookImageUrl().equals(req.getBookImageUrl())&&isCategoriesEquals&&book.isRecommended()==req.isRecommended()&&book.isNew()==req.isNews()) {
             throw new BooksEqualException("You haven't changed anything!");
         }
         else {
-            bookCategoryRepository.deleteById(new BookCategoryKey(205,4));
 
             book.setBookName(req.getBookName());
             book.setRecommended(req.isRecommended());
+            book.setNew(req.isNews());
             book.setBookAuthor(req.getBookAuthor());
             book.setYearOfPublishing(req.getYearOfPublishing());
             book.setRating(req.getRating());
@@ -154,6 +155,14 @@ public class BookService {
 
     }
 
+    public GetBooksPaginationRes getNewBooks (int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Books> books = bookRepository.findAllByIsNew(true,pageable);
+        GetBooksPaginationRes res = modelMapper.map(books,GetBooksPaginationRes.class);
+        return res;
+
+    }
+
 
     public GetBooksPaginationRes getBooksBySearch(String pattern,int page, int size) {
         Pageable pageable= PageRequest.of(page, size);
@@ -195,7 +204,6 @@ public class BookService {
         List<RequestedBooksRes> res = bookings.stream().map(d->modelMapper.map(d, RequestedBooksRes.class)).collect(Collectors.toList());
         return res;
     }
-
     public List<UsedBookRes> getUsedBooks(Authentication authentication) {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();

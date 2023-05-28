@@ -19,4 +19,5 @@ public class GetBookingsByStatusAndEmailRes {
 
     private List<BookingByStatusAndEmail> content;
     private int totalPages;
+    private int totalElements;
 }

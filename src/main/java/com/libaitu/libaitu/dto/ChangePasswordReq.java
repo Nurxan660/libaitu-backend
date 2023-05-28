@@ -9,11 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegistrationReq {
-    private String username;
+public class ChangePasswordReq {
 
-    private String email;
-    private String fullName;
-    private String password;
-    private String role;
+    private String oldPassword;
+    private String newPassword;
 }

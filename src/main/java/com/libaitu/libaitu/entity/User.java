@@ -15,8 +15,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer userId;
+    @Column(unique = true)
     private String username;
     private String fullName;
+    @Column(unique = true)
     private String email;
     private String password;
     @OneToOne(cascade = CascadeType.ALL)

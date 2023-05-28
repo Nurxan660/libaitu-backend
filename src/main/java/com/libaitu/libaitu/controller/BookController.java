@@ -92,6 +92,14 @@ public class BookController {
 
     }
 
+    @GetMapping("/getNew")
+    public ResponseEntity getNewBooks(@RequestParam int page, @RequestParam int size) {
+
+        GetBooksPaginationRes res = bookService.getNewBooks(page, size);
+        return ResponseEntity.ok(res);
+
+    }
+
     @GetMapping("/getByPattern")
     public ResponseEntity getBooksByPattern(@RequestParam String pattern, @RequestParam int page, @RequestParam int size) {
 

@@ -23,5 +23,6 @@ public class SaveBookReq {
     private Integer amountOfBooks;
     private Integer rating;
     private boolean recommended;
+    private boolean news;
     private List<String> categories;
 }

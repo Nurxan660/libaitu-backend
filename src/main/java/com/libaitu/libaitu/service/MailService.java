@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MailService {
 
-    @Autowired(required = false)
+    @Autowired()
     private JavaMailSender mailSender;
 
 
@@ -25,7 +25,7 @@ public class MailService {
             MimeMessage mimeMessage=mailSender.createMimeMessage();
             MimeMessageHelper helper=new MimeMessageHelper(mimeMessage,"utf-8");
             helper.setText(emailBody);
-            helper.setFrom("music.beat@bk.ru");
+            helper.setFrom("ertaev.nurxan@bk.ru");
             helper.setTo(to);
             helper.setSubject(subject);
             mailSender.send(mimeMessage);

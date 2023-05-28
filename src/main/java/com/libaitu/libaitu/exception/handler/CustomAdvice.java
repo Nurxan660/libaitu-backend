@@ -36,5 +36,18 @@ public class CustomAdvice {
         return ResponseEntity.status(409).body(exception);
     }
 
+    @ExceptionHandler(PasswordMatcherException.class)
+    public ResponseEntity<ResponseMessage> handlePass(PasswordMatcherException e){
+        ResponseMessage exception=new ResponseMessage(e.getMessage());
+        return ResponseEntity.status(400).body(exception);
+    }
+
+    @ExceptionHandler({BookBookingNoAccess.class, EmailAlreadyExistException.class, UsernameAlreadyExistException.class, InvalidEmailCodeException.class})
+    public ResponseEntity<ResponseMessage> handleNoAccess(Exception e){
+        ResponseMessage exception=new ResponseMessage(e.getMessage());
+        return ResponseEntity.status(400).body(exception);
+    }
+
+
 
 }

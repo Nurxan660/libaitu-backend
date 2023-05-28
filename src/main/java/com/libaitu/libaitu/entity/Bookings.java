@@ -30,6 +30,7 @@ public class Bookings {
     @Enumerated(EnumType.STRING)
     private EBookingStatuses bookingStatus;
     private boolean showInHistory;
+
     private LocalDateTime bookingCompletedTime;
 
 

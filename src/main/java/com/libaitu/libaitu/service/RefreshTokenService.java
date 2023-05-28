@@ -40,7 +40,6 @@ public class RefreshTokenService {
 
         }
         refreshTokenRepository.save(refreshToken);
-
         return refreshToken.getToken();
     }
     public String generateRefreshToken(){

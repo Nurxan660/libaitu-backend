@@ -1,10 +1,13 @@
 package com.libaitu.libaitu.controller;
 
 
+import com.libaitu.libaitu.dto.ChangePasswordReq;
 import com.libaitu.libaitu.dto.SaveBookReq;
 import com.libaitu.libaitu.dto.UserInfoRes;
+import com.libaitu.libaitu.dto.UserInfoResPagination;
 import com.libaitu.libaitu.exception.BooksEqualException;
 import com.libaitu.libaitu.exception.NotFoundException;
+import com.libaitu.libaitu.exception.PasswordMatcherException;
 import com.libaitu.libaitu.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +29,23 @@ public class UserController {
 
         UserInfoRes res = userService.getUserInfo(authentication);
         return ResponseEntity.ok(res);
+
+    }
+
+
+    @GetMapping("/getUserInfoByPattern")
+    public ResponseEntity getInfoByPattern(@RequestParam String pattern, int page, int size) throws NotFoundException {
+
+        UserInfoResPagination res = userService.getUserInfoByPattern(pattern, page, size);
+        return ResponseEntity.ok(res);
+
+    }
+
+    @PutMapping("/change/password")
+    public ResponseEntity changePassword(@RequestBody ChangePasswordReq req, Authentication authentication) throws NotFoundException, PasswordMatcherException {
+
+        userService.changePassword(authentication,req.getOldPassword(), req.getNewPassword());
+        return ResponseEntity.ok("You successfully changed the password!");
 
     }
 

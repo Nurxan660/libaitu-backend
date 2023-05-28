@@ -33,6 +33,7 @@ public class Books {
     private Integer amountOfBooks;
     private Integer rating;
     private boolean isRecommended;
+    private boolean isNew;
     @OneToMany(mappedBy = "books", cascade = CascadeType.ALL)
     private List<BookCategory> bookCategories;
 
